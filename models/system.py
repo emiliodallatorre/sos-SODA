@@ -39,7 +39,7 @@ class System:
 
             planet.position += planet.velocity * dt
 
-        self.draw_system()
+        # self.draw_system()
 
     def draw_planet(self, planet: Planet):
         """
@@ -52,8 +52,8 @@ class System:
             planet.position.x,
             planet.position.y,
             planet.position.z,
-            color="red",
-            s=planet.mass,
+            color=planet.color,
+            s=planet.mass * 100,
         )
 
     def draw_system(self):
@@ -61,13 +61,19 @@ class System:
         Draw the system in a 3D plot
         :return:
         """
-        farthest_planet_distance: float = max(self.planets,
-                                              key=lambda planet: planet.position.length()).position.length()
-        axes_limit = farthest_planet_distance * 1.1
-
-        self.ax.set_xlim(-axes_limit, axes_limit)
-        self.ax.set_ylim(-axes_limit, axes_limit)
-        self.ax.set_zlim(-axes_limit, axes_limit)
+        #  farthest_planet_distance: float = max(self.planets,
+        #                                      key=lambda planet: planet.position.length()).position.length()
+        # axes_limit = farthest_planet_distance * 1.1
+        # self.ax.set_xlim(-axes_limit, axes_limit)
+        # self.ax.set_ylim(-axes_limit, axes_limit)
+        # self.ax.set_zlim(-axes_limit, axes_limit)
 
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
+
+    def save_system(self, filename: str):
+        """
+        Save the system in a 3D plot
+        :return:
+        """
+        self.fig.savefig(filename)
