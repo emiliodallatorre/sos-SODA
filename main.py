@@ -1,4 +1,4 @@
-from math import sqrt
+import matplotlib.pyplot as plt
 
 from models.planet import Planet
 from models.system import System
@@ -16,25 +16,36 @@ system: System = System(
         ),
         Planet(
             "Earth",
-            1,
-            Vector(sqrt(2), sqrt(2), 0),
-            Vector(0.5, -0.5, 0),
+            1 / 2,
+            Vector(2, 1, 0),
+            Vector(0, 1, 0),
             "blue",
-        ),
-        Planet(
-            "Moon",
-            1,
-            Vector(sqrt(2.0001), sqrt(2.0001), 0),
-            Vector(0.5, -0.5, 0),
-            "grey",
         ),
     ],
 )
 
-for i in range(2000):
+for i in range(200000):
     system.step(0.1)
     if i % 100 == 0:
-        print(i)
+        print(f"Step {i}")
 
-system.draw_system()
-system.save_system("test.png")
+fig, ax = plt.subplots(
+    1,
+    1,
+    # subplot_kw=dict(projection="3d"),
+    figsize=(10, 10),
+)
+fig.show()
+
+for planet in system.planets:
+    ax.scatter(
+        [position.x for position in planet.positions],
+        [position.y for position in planet.positions],
+        color=planet.color,
+        s=planet.mass * 10,
+    )
+
+fig.canvas.draw()
+fig.canvas.flush_events()
+fig.show()
+# fig.savefig("test.png")
