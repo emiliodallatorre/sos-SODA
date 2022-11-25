@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from models.vector import Vector
 
 
@@ -24,8 +26,9 @@ class System:
                 planet.velocity += (force_direction * force / planet.mass) * dt
 
             planet.position = planet.position + planet.velocity * dt
+            print(planet.position)
 
-        self.states.append(self.planets)
+        self.states.append(deepcopy(self.planets))
 
     def simulate(self, dt: float, steps: int) -> list:
         for i in range(steps):

@@ -16,14 +16,14 @@ system: System = System(
         Planet(
             "Earth",
             1 / 2,
-            Vector(2, 1, 0),
+            Vector(2, 0, 0),
             Vector(0, 1, 0),
             "blue",
         ),
     ],
 )
 
-simulation_results: list = system.simulate(0.1, 10000)
+simulation_results: list = system.simulate(10, 100000)
 
 plotter: Plotter = Plotter(simulation_results)
 plotter.plot()
