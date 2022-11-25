@@ -29,5 +29,5 @@ class Vector:
     def length(self) -> float:
         return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
-    def distance(self, other):
+    def distance(self, other) -> float:
         return (self - other).length()

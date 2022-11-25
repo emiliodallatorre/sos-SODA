@@ -1,12 +1,11 @@
-import matplotlib.pyplot as plt
+from models.vector import Vector
 
 
 class System:
     planets: list = []
-    fig: plt.Figure
-    ax: plt.Axes
+    states: list = []
 
-    def __init__(self, planets: list, plot_size: tuple = (10, 10)):
+    def __init__(self, planets: list):
         self.planets = planets
 
     def step(self, dt: float):
@@ -18,11 +17,18 @@ class System:
                 if other is planet:
                     continue
 
-                distance = planet.current_position().distance(other.current_position())
-                force = planet.mass * other.mass / distance ** 2
+                distance: float = planet.position.distance(other.position)
+                force: Vector = planet.mass * other.mass / (distance ** 2)
+                force_direction: Vector = (planet.position - other.position) / distance
 
-                direction = (planet.current_position() - other.current_position()) / distance
-        
-                planet.velocity += direction * force / planet.mass * dt
+                planet.velocity += (force_direction * force / planet.mass) * dt
 
-            planet.new_position(planet.current_position() + planet.velocity * dt)
+            planet.position = planet.position + planet.velocity * dt
+
+        self.states.append(self.planets)
+
+    def simulate(self, dt: float, steps: int) -> list:
+        for i in range(steps):
+            self.step(dt)
+
+        return self.states
