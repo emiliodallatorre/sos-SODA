@@ -23,7 +23,9 @@ system: System = System(
     ],
 )
 
-simulation_results: list = system.simulate(10, 100000)
-
-plotter: Plotter = Plotter(simulation_results)
+dt: float = 0.1
+steps: int = 1000
+simulation_results: list = system.simulate(dt, steps)
+plotter: Plotter = Plotter(simulation_results, dt, steps)
+# plotter.show()
 plotter.plot()

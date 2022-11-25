@@ -1,12 +1,14 @@
+from matplotlib import pyplot as plt
 from matplotlib.animation import FFMpegWriter, FuncAnimation
 from matplotlib.pyplot import subplots
 
 
 class Plotter:
-    def __init__(self, simulation_results: list):
+    def __init__(self, simulation_results: list, dt: float, steps: int):
         self.simulation_results = simulation_results
+        self.dt = dt
+        self.steps = steps
 
-    def plot(self):
         fig, ax = subplots(
             1,
             1,
@@ -41,7 +43,13 @@ class Plotter:
                     color=planet.color,
                 )
 
-        animation = FuncAnimation(fig, animate, interval=len(self.simulation_results))
+        self.animation = FuncAnimation(fig, animate, frames=self.steps,
+                                       interval=dt*1000)
+
+    def plot(self):
         video_file = r"animation.mp4"
-        writer = FFMpegWriter(fps=60)
-        animation.save(video_file, writer=writer)
+        writer = FFMpegWriter(fps=20)
+        self.animation.save(video_file, writer=writer)
+
+    def show(self):
+        plt.show()

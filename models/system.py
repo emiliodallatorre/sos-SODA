@@ -6,6 +6,8 @@ from models.vector import Vector
 class System:
     planets: list = []
     states: list = []
+    dt: float
+    steps: int
 
     def __init__(self, planets: list):
         self.planets = planets
@@ -23,14 +25,17 @@ class System:
                 force: Vector = planet.mass * other.mass / (distance ** 2)
                 force_direction: Vector = (planet.position - other.position) / distance
 
-                planet.velocity += (force_direction * force / planet.mass) * dt
+                planet.velocity -= (force_direction * force / (planet.mass / 2)) * dt
 
+        for planet in self.planets:
             planet.position = planet.position + planet.velocity * dt
-            print(planet.position)
 
         self.states.append(deepcopy(self.planets))
 
     def simulate(self, dt: float, steps: int) -> list:
+        self.dt = dt
+        self.steps = steps
+
         for i in range(steps):
             self.step(dt)
 
