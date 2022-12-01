@@ -44,6 +44,11 @@ class Plotter:
                     color=planet.color,
                 )
 
+                ax.quiver(
+                    planet.position.x, planet.position.y, planet.position.z,
+                    planet.velocity.x, planet.velocity.y, planet.velocity.z,
+                )
+
         self.animation = FuncAnimation(fig, animate, frames=self.steps,
                                        interval=dt * 1000)
 

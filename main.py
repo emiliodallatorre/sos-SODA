@@ -30,8 +30,8 @@ system: System = System(
     ],
 )
 
-dt: float = 1
-steps: int = 1000
+dt: float = 0.1
+steps: int = 200
 simulation_results: list = system.simulate(dt, steps)
 plotter: Plotter = Plotter(simulation_results, dt, steps)
 # plotter.show()

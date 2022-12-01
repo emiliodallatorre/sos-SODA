@@ -6,6 +6,7 @@ class Planet:
     mass: float
     position: Vector
     velocity: Vector
+    acceleration: Vector = Vector(0, 0, 0)
     color: str
 
     fixed: bool

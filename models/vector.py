@@ -31,3 +31,6 @@ class Vector:
 
     def distance(self, other) -> float:
         return (self - other).length()
+
+    def versor(self) -> 'Vector':
+        return self / self.length()

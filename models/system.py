@@ -23,9 +23,9 @@ class System:
 
                 distance: float = planet.position.distance(other.position)
                 force: Vector = planet.mass * other.mass / (distance ** 2)
-                force_direction: Vector = (planet.position - other.position) / distance
+                force_direction: Vector = (planet.position - other.position).versor()
 
-                planet.velocity -= (force_direction * force / planet.mass) * dt
+                planet.velocity -= force_direction * (force / planet.mass) * dt
 
         for planet in self.planets:
             planet.position = planet.position + planet.velocity * dt
