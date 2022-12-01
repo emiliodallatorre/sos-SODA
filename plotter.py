@@ -29,11 +29,12 @@ class Plotter:
                 if abs(planet.position.z) > farthest_z:
                     farthest_z = planet.position.z
 
+        ax.set_xlim(-farthest_x, farthest_x)
+        ax.set_ylim(-farthest_y, farthest_y)
+        ax.set_zlim(-farthest_z, farthest_z)
+
         def animate(i):
             ax.clear()
-            ax.set_xlim(-farthest_x, farthest_x)
-            ax.set_ylim(-farthest_y, farthest_y)
-            ax.set_zlim(-farthest_z, farthest_z)
 
             for planet in self.simulation_results[i]:
                 ax.plot(
@@ -44,7 +45,7 @@ class Plotter:
                 )
 
         self.animation = FuncAnimation(fig, animate, frames=self.steps,
-                                       interval=dt*1000)
+                                       interval=dt * 1000)
 
     def plot(self):
         video_file = r"animation.mp4"

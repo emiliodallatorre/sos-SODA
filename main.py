@@ -20,10 +20,17 @@ system: System = System(
             Vector(0, 1, 0),
             "blue",
         ),
+        Planet(
+            "Moon",
+            1 / 4,
+            Vector(2.01, 0, 0),
+            Vector(0, 1, 0),
+            "grey",
+        ),
     ],
 )
 
-dt: float = 0.1
+dt: float = 1
 steps: int = 1000
 simulation_results: list = system.simulate(dt, steps)
 plotter: Plotter = Plotter(simulation_results, dt, steps)

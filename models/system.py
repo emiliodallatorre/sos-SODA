@@ -25,7 +25,7 @@ class System:
                 force: Vector = planet.mass * other.mass / (distance ** 2)
                 force_direction: Vector = (planet.position - other.position) / distance
 
-                planet.velocity -= (force_direction * force / (planet.mass / 2)) * dt
+                planet.velocity -= (force_direction * force / planet.mass) * dt
 
         for planet in self.planets:
             planet.position = planet.position + planet.velocity * dt
