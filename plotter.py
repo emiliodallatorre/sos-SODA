@@ -4,11 +4,14 @@ from matplotlib.pyplot import subplots
 
 
 class Plotter:
+    animation = None
+
     def __init__(self, simulation_results: list, dt: float, steps: int):
         self.simulation_results = simulation_results
         self.dt = dt
         self.steps = steps
 
+    def get_animation(self):
         fig, ax = subplots(
             1,
             1,
@@ -29,13 +32,15 @@ class Plotter:
                 if abs(planet.position.z) > farthest_z:
                     farthest_z = planet.position.z
 
-
-
         def animate(i):
             ax.clear()
+
             ax.set_xlim(-farthest_x, farthest_x)
             ax.set_ylim(-farthest_y, farthest_y)
             ax.set_zlim(-farthest_z, farthest_z)
+            ax.set_xlabel("X")
+            ax.set_ylabel("Y")
+            ax.set_zlabel("Z")
 
             for planet in self.simulation_results[i]:
                 ax.plot(
@@ -57,13 +62,31 @@ class Plotter:
                     color="red",
                 )
 
-        self.animation = FuncAnimation(fig, animate, frames=self.steps,
-                                       interval=dt * 1000)
+        if self.animation is None:
+            self.animation = FuncAnimation(fig, animate, frames=self.steps,
+                                           interval=1)
+        return self.animation
 
     def plot(self):
         video_file = r"animation.mp4"
         writer = FFMpegWriter(fps=20)
-        self.animation.save(video_file, writer=writer)
+        self.get_animation().save(video_file, writer=writer)
+
+    def static_plot(self):
+        # Plot the points of planet positions
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+
+        for planets in self.simulation_results:
+            for planet in planets:
+                ax.plot(
+                    planet.position.x, planet.position.y, planet.position.z,
+                    marker="o",
+                    markersize=planet.mass,
+                    color=planet.color,
+                )
+
+        plt.show()
 
     def show(self):
-        plt.show()
+        self.get_animation().show()

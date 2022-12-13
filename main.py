@@ -17,16 +17,18 @@ system: System = System(
             "Earth",
             1/2,
             Vector(4, 0, 0),
-            Vector(0, 4, 0),
+            Vector(0, 1/2, 0),
             "blue",
         ),
     ],
-    G=20,
+    G=1,
 )
 
-dt: float = 0.01
-steps: int = 1000
+dt: float = 0.1
+steps: int = 10000
 simulation_results: list = system.simulate(dt, steps)
 plotter: Plotter = Plotter(simulation_results, dt, steps)
-plotter.show()
+
+plotter.static_plot()
+# plotter.show()
 # plotter.plot()
