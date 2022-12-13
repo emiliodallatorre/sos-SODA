@@ -29,12 +29,13 @@ class Plotter:
                 if abs(planet.position.z) > farthest_z:
                     farthest_z = planet.position.z
 
-        ax.set_xlim(-farthest_x, farthest_x)
-        ax.set_ylim(-farthest_y, farthest_y)
-        ax.set_zlim(-farthest_z, farthest_z)
+
 
         def animate(i):
             ax.clear()
+            ax.set_xlim(-farthest_x, farthest_x)
+            ax.set_ylim(-farthest_y, farthest_y)
+            ax.set_zlim(-farthest_z, farthest_z)
 
             for planet in self.simulation_results[i]:
                 ax.plot(
@@ -47,6 +48,13 @@ class Plotter:
                 ax.quiver(
                     planet.position.x, planet.position.y, planet.position.z,
                     planet.velocity.x, planet.velocity.y, planet.velocity.z,
+                )
+
+                planet.acting_force *= 10
+                ax.quiver(
+                    planet.position.x, planet.position.y, planet.position.z,
+                    planet.acting_force.x, planet.acting_force.y, planet.acting_force.z,
+                    color="red",
                 )
 
         self.animation = FuncAnimation(fig, animate, frames=self.steps,

@@ -9,26 +9,29 @@ class System:
     dt: float
     steps: int
 
-    def __init__(self, planets: list):
+    def __init__(self, planets: list, G=10):
         self.planets = planets
+        self.G = G
 
     def step(self, dt: float):
         for planet in self.planets:
             if planet.fixed:
                 continue
 
+            planet.acting_force = Vector(0, 0, 0)
             for other in self.planets:
                 if other is planet:
                     continue
 
                 distance: float = planet.position.distance(other.position)
-                force: Vector = planet.mass * other.mass / (distance ** 2)
-                force_direction: Vector = (planet.position - other.position).versor()
+                force: Vector = self.G * (planet.mass * other.mass) / (distance ** 2)
+                force_direction: Vector = (other.position - planet.position).versor()
 
-                planet.velocity -= force_direction * (force / planet.mass) * dt
+                planet.velocity += force_direction * (force / planet.mass) * dt
+                planet.acting_force += force_direction * force
 
         for planet in self.planets:
-            planet.position = planet.position + planet.velocity * dt
+            planet.position = planet.position + (planet.velocity * dt)
 
         self.states.append(deepcopy(self.planets))
 
