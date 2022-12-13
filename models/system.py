@@ -20,6 +20,7 @@ class System:
 
             planet.acting_force = Vector(0, 0, 0)
             for other in self.planets:
+
                 if other is planet:
                     continue
 

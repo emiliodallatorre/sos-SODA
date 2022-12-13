@@ -4,14 +4,11 @@ from matplotlib.pyplot import subplots
 
 
 class Plotter:
-    animation = None
-
     def __init__(self, simulation_results: list, dt: float, steps: int):
         self.simulation_results = simulation_results
         self.dt = dt
         self.steps = steps
 
-    def get_animation(self):
         fig, ax = subplots(
             1,
             1,
@@ -38,15 +35,12 @@ class Plotter:
             ax.set_xlim(-farthest_x, farthest_x)
             ax.set_ylim(-farthest_y, farthest_y)
             ax.set_zlim(-farthest_z, farthest_z)
-            ax.set_xlabel("X")
-            ax.set_ylabel("Y")
-            ax.set_zlabel("Z")
 
             for planet in self.simulation_results[i]:
                 ax.plot(
                     planet.position.x, planet.position.y, planet.position.z,
                     marker="o",
-                    markersize=planet.mass * 30,
+                    markersize=max([planet.mass * 10, 5]),
                     color=planet.color,
                 )
 
@@ -55,38 +49,24 @@ class Plotter:
                     planet.velocity.x, planet.velocity.y, planet.velocity.z,
                 )
 
-                planet.acting_force *= 10
+                planet.acting_force *= 1
                 ax.quiver(
                     planet.position.x, planet.position.y, planet.position.z,
                     planet.acting_force.x, planet.acting_force.y, planet.acting_force.z,
                     color="red",
                 )
 
-        if self.animation is None:
-            self.animation = FuncAnimation(fig, animate, frames=self.steps,
-                                           interval=1)
-        return self.animation
+                ax.set_xlabel("X")
+                ax.set_ylabel("Y")
+                ax.set_zlabel("Z")
+
+        self.animation = FuncAnimation(fig, animate, frames=self.steps,
+                                       interval=dt * 1000)
 
     def plot(self):
         video_file = r"animation.mp4"
         writer = FFMpegWriter(fps=20)
-        self.get_animation().save(video_file, writer=writer)
-
-    def static_plot(self):
-        # Plot the points of planet positions
-        fig = plt.figure()
-        ax = fig.add_subplot(projection='3d')
-
-        for planets in self.simulation_results:
-            for planet in planets:
-                ax.plot(
-                    planet.position.x, planet.position.y, planet.position.z,
-                    marker="o",
-                    markersize=planet.mass,
-                    color=planet.color,
-                )
-
-        plt.show()
+        self.animation.save(video_file, writer=writer)
 
     def show(self):
-        self.get_animation().show()
+        plt.show()
