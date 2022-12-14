@@ -51,10 +51,7 @@ class System:
     def simulate_with_opencl(self, dt: float, steps: int) -> list:
         self.states: list = [self.states[0]]
 
-        self.dt = dt
-        self.steps = steps
+        from opencl.opencl_system import OpenCLSystem
+        opencl_system: OpenCLSystem = OpenCLSystem(self)
 
-        for i in range(steps):
-            self.step(dt)
-
-        return self.states
+        print(opencl_system.simulate(steps, dt))

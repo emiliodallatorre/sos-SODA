@@ -1,1 +1,4 @@
 matplotlib==3.6.2
+numpy==1.23.5
+pyopencl==2022.3
+tqdm==4.64.1
