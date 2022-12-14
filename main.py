@@ -34,10 +34,10 @@ system: System = System(
 )
 
 dt: float = 0.001
-steps: int = 10000
+steps: int = 1000
 simulation_results: list = system.simulate(dt, steps)
 plotter: Plotter = Plotter(simulation_results, dt, steps)
 
 # plotter.static_plot()
-plotter.show()
-# plotter.plot()
+# plotter.show()
+plotter.plot()

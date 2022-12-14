@@ -12,6 +12,7 @@ class System:
     def __init__(self, planets: list, G=10):
         self.planets = planets
         self.G = G
+        self.states.append(deepcopy(self.planets))
 
     def step(self, dt: float):
         for planet in self.planets:
@@ -37,6 +38,15 @@ class System:
         self.states.append(deepcopy(self.planets))
 
     def simulate(self, dt: float, steps: int) -> list:
+        self.dt = dt
+        self.steps = steps
+
+        for i in range(steps):
+            self.step(dt)
+
+        return self.states
+
+    def simulate_with_opencl(self, dt: float, steps: int) -> list:
         self.dt = dt
         self.steps = steps
 

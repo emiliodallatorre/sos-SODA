@@ -65,7 +65,7 @@ class Plotter:
 
     def plot(self):
         video_file = r"animation.mp4"
-        writer = FFMpegWriter(fps=20)
+        writer = FFMpegWriter(fps=60)
         self.animation.save(video_file, writer=writer)
 
     def show(self):
