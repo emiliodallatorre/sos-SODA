@@ -1,5 +1,7 @@
 from math import sqrt
 
+from tqdm import tqdm
+
 from models.planet import Planet
 from models.system import System
 from models.vector import Vector
@@ -34,16 +36,32 @@ system: System = System(
 )
 
 dt: float = 0.001
-steps: int = 1000
 
-# Let's benchmark the CPU simulation
-cpu_benchmark: Benchmark = Benchmark(system.simulate, dt, steps)
-cpu_benchmark.run()
+cpu_benchmarks: list = []
+gpu_benchmarks: list = []
+steps: list = []
 
-# Let's benchmark the GPU simulation
-gpu_benchmark: Benchmark = Benchmark(system.simulate_with_opencl, dt, steps)
-gpu_benchmark.run()
+for i in tqdm(range(1000, 10000, 1000)):
+    cpu_benchmark: Benchmark = Benchmark(system.simulate, dt, i)
+    gpu_benchmark: Benchmark = Benchmark(system.simulate_with_opencl, dt, i)
 
-# Let's print the results
-print(f"CPU simulation took {cpu_benchmark.time} seconds")
-print(f"GPU simulation took {gpu_benchmark.time} seconds")
+    cpu_benchmark.run()
+    gpu_benchmark.run()
+
+    cpu_benchmarks.append(cpu_benchmark)
+    gpu_benchmarks.append(gpu_benchmark)
+
+    steps.append(i)
+
+cpu_times: list = [benchmark.time for benchmark in cpu_benchmarks]
+gpu_times: list = [benchmark.time for benchmark in gpu_benchmarks]
+
+# Plot the results
+import matplotlib.pyplot as plt
+
+plt.plot(steps, cpu_times, label="CPU")
+plt.plot(steps, gpu_times, label="GPU")
+plt.xlabel("Steps")
+plt.ylabel("Time (ms)")
+plt.legend()
+plt.show()
