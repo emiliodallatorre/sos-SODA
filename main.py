@@ -3,7 +3,7 @@ from math import sqrt
 from models.planet import Planet
 from models.system import System
 from models.vector import Vector
-from plotter import Plotter
+from utils.benchmark import Benchmark
 
 system: System = System(
     [
@@ -35,9 +35,15 @@ system: System = System(
 
 dt: float = 0.001
 steps: int = 1000
-simulation_results: list = system.simulate(dt, steps)
-plotter: Plotter = Plotter(simulation_results, dt, steps)
 
-# plotter.static_plot()
-# plotter.show()
-plotter.plot()
+# Let's benchmark the CPU simulation
+cpu_benchmark: Benchmark = Benchmark(system.simulate, dt, steps)
+cpu_benchmark.run()
+
+# Let's benchmark the GPU simulation
+gpu_benchmark: Benchmark = Benchmark(system.simulate_with_opencl, dt, steps)
+gpu_benchmark.run()
+
+# Let's print the results
+print(f"CPU simulation took {cpu_benchmark.time} seconds")
+print(f"GPU simulation took {gpu_benchmark.time} seconds")
