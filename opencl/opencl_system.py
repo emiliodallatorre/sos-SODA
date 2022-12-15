@@ -1,5 +1,6 @@
 import numpy as np
 import pyopencl as cl
+import pyopencl.array as pycl_array
 
 from models.system import System
 
@@ -20,6 +21,7 @@ class OpenCLSystem:
     context: cl.Context
 
     def __init__(self, system: System):
+        self.queue = None
         self.masses_buf = None
         self.positions_x_buf = None
         self.positions_y_buf = None
@@ -40,28 +42,22 @@ class OpenCLSystem:
         self.velocities_z = np.array([planet.velocity.z for planet in system.planets])
         self.fixed = np.array([planet.fixed for planet in system.planets])
 
+        print(self.positions_x)
+
     def initialize(self):
         # Select a device
         self.context = cl.create_some_context()
         self.queue = cl.CommandQueue(self.context)
 
         # Allocate memory on the device and copy the content of our numpy array
-        self.masses_buf = cl.Buffer(self.context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR,
-                                    hostbuf=self.masses)
-        self.positions_x_buf = cl.Buffer(self.context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR,
-                                         hostbuf=self.positions_x)
-        self.positions_y_buf = cl.Buffer(self.context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR,
-                                         hostbuf=self.positions_y)
-        self.positions_z_buf = cl.Buffer(self.context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR,
-                                         hostbuf=self.positions_z)
-        self.velocities_x_buf = cl.Buffer(self.context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR,
-                                          hostbuf=self.velocities_x)
-        self.velocities_y_buf = cl.Buffer(self.context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR,
-                                          hostbuf=self.velocities_y)
-        self.velocities_z_buf = cl.Buffer(self.context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR,
-                                          hostbuf=self.velocities_z)
-        self.fixed_buf = cl.Buffer(self.context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR,
-                                   hostbuf=self.fixed)
+        self.masses = pycl_array.to_device(self.queue, self.masses)
+        self.positions_x = pycl_array.to_device(self.queue, self.positions_x)
+        self.positions_y = pycl_array.to_device(self.queue, self.positions_y)
+        self.positions_z = pycl_array.to_device(self.queue, self.positions_z)
+        self.velocities_x = pycl_array.to_device(self.queue, self.velocities_x)
+        self.velocities_y = pycl_array.to_device(self.queue, self.velocities_y)
+        self.velocities_z = pycl_array.to_device(self.queue, self.velocities_z)
+        self.fixed = pycl_array.to_device(self.queue, self.fixed)
 
         with open("opencl/system.c", "r") as f:
             kernel = f.read()
@@ -73,35 +69,29 @@ class OpenCLSystem:
         if not self.initialized:
             self.initialize()
 
-        earth_positions_x_buf: cl.Buffer = cl.Buffer(self.context, cl.mem_flags.WRITE_ONLY, 8 * steps)
-        earth_positions_y_buf: cl.Buffer = cl.Buffer(self.context, cl.mem_flags.WRITE_ONLY, 8 * steps)
-        earth_positions_z_buf: cl.Buffer = cl.Buffer(self.context, cl.mem_flags.WRITE_ONLY, 8 * steps)
+        earth_positions_x = pycl_array.empty(self.queue, self.positions_x.shape, self.positions_x.dtype)
+        earth_positions_y = pycl_array.empty(self.queue, self.positions_y.shape, self.positions_y.dtype)
+        earth_positions_z = pycl_array.empty(self.queue, self.positions_z.shape, self.positions_z.dtype)
 
         self.opencl_program.simulate(
             self.queue,
-            self.opencl_program.simulate,
-            steps * 8 * 12,
+            (
+                len(self.system.planets),
+            ),
             None,
 
-            self.masses_buf,
-            self.positions_x_buf,
-            self.positions_y_buf,
-            self.positions_z_buf,
-            self.velocities_x_buf,
-            self.velocities_y_buf,
-            self.velocities_z_buf,
-            self.fixed_buf,
-            earth_positions_x_buf,
-            earth_positions_y_buf,
-            earth_positions_z_buf,
+            self.masses.data,
+            self.positions_x.data,
+            self.positions_y.data,
+            self.positions_z.data,
+            self.velocities_x.data,
+            self.velocities_y.data,
+            self.velocities_z.data,
+            self.fixed.data,
+
+            earth_positions_x.data,
+            earth_positions_y.data,
+            earth_positions_z.data,
         )
 
-        earth_positions_x = np.empty(steps, dtype=np.float32)
-        earth_positions_y = np.empty(steps, dtype=np.float32)
-        earth_positions_z = np.empty(steps, dtype=np.float32)
-
-        cl.enqueue_copy(self.queue, earth_positions_x, earth_positions_x_buf)
-        cl.enqueue_copy(self.queue, earth_positions_y, earth_positions_y_buf)
-        cl.enqueue_copy(self.queue, earth_positions_z, earth_positions_z_buf)
-
-        return earth_positions_x, earth_positions_y, earth_positions_z
+        return [list(earth_positions_x), list(earth_positions_y), list(earth_positions_z)]

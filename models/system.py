@@ -10,6 +10,7 @@ class System:
     steps: int
 
     def __init__(self, planets: list, G=10):
+        self.opencl_system = None
         self.planets = planets
         self.G = G
         self.states.append(deepcopy(self.planets))
@@ -52,6 +53,13 @@ class System:
         self.states: list = [self.states[0]]
 
         from opencl.opencl_system import OpenCLSystem
-        opencl_system: OpenCLSystem = OpenCLSystem(self)
+        self.opencl_system: OpenCLSystem = OpenCLSystem(self)
 
-        print(opencl_system.simulate(steps, dt))
+        results: list = self.opencl_system.simulate(steps, dt)
+        originals: list = [self.opencl_system.positions_x, self.opencl_system.positions_y,
+                           self.opencl_system.positions_z]
+
+        # Confront results with originals
+        for i in range(len(results)):
+            for j in range(len(results[i])):
+                print(results[i][j], originals[i][j])

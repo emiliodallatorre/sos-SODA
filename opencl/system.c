@@ -1,24 +1,24 @@
-
-
-
 __kernel void simulate(
-        __global const float *masses_buf,
-        __global const float *positions_x_buf,
-        __global const float *positions_y_buf,
-        __global const float *positions_z_buf,
-        __global const float *velocities_x_buf,
-        __global const float *velocities_y_buf,
-        __global const float *velocities_z_buf,
-        __global float *fixed_buf,
+        __global const double *masses,
+        __global const double *positions_x,
+        __global const double *positions_y,
+        __global const double *positions_z,
+        __global const double *velocities_x,
+        __global const double *velocities_y,
+        __global const double *velocities_z,
+        __global const double *fixed,
 
-        __global float *earth_positions_x_buf,
-        __global float *earth_positions_y_buf,
-        __global float *earth_positions_z_buf,
+        __global double *earth_positions_x,
+        __global double *earth_positions_y,
+        __global double *earth_positions_z
     )
 {
-  int pid = get_global_id(0);
+  unsigned int pid = get_global_id(0);
 
-  earth_positions_x_buf[pid] = positions_x_buf[pid];
-  earth_positions_y_buf[pid] = positions_y_buf[pid];
-  earth_positions_z_buf[pid] = positions_z_buf[pid];
+  earth_positions_x[pid] = positions_x[pid];
+  earth_positions_y[pid] = positions_y[pid];
+  earth_positions_z[pid] = positions_z[pid];
+
+  // Print mass by pid
+  printf("pid: %d, mass: %f\n", pid, masses[pid]);
 }
