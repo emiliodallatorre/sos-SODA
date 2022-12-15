@@ -56,10 +56,6 @@ class System:
         self.opencl_system: OpenCLSystem = OpenCLSystem(self)
 
         results: list = self.opencl_system.simulate(steps, dt)
-        originals: list = [self.opencl_system.positions_x, self.opencl_system.positions_y,
-                           self.opencl_system.positions_z]
+        originals: list = self.opencl_system.positions
 
-        # Confront results with originals
-        for i in range(len(results)):
-            for j in range(len(results[i])):
-                print(results[i][j], originals[i][j])
+
