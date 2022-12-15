@@ -90,6 +90,7 @@ class OpenCLSystem:
                 None,
 
                 # Constants
+                self.fixed.data,
                 self.positions.data,
                 self.velocities.data,
                 self.accelerations.data,

@@ -22,7 +22,6 @@ class Plotter:
 
         for planets in self.simulation_results:
             for planet in planets:
-                print(planet.position)
                 if abs(planet.position.x) > farthest_x:
                     farthest_x = abs(planet.position.x)
                 if abs(planet.position.y) > farthest_y:

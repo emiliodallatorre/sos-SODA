@@ -57,3 +57,4 @@ class System:
 
         self.states = self.opencl_system.simulate(steps, dt)
         return self.states
+

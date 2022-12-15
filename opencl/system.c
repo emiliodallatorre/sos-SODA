@@ -10,7 +10,6 @@ int access3Darray(int x, int y, int z, int width, int height) {
 
 double getAcceleration(double mass, double otherMass, double position, double otherPosition, bool fixed) {
     double distance = position - otherPosition;
-
     if (fixed || fabs(distance) < 0.0001) {
         return 0.0f;
     }
@@ -46,16 +45,12 @@ __kernel void calculateAccelerations(
     double otherPosition = positions[access3Darray(dimensionId, otherPlanetId, time, dimensionCount, planetCount)];
     bool isFixed = fixed[planetId];
 
-    // Print position and planetId, dimensionId
-    // printf("PlanetId: %d, DimensionId: %d, Position: %f\n", planetId, dimensionId, position);
-
-    // printf("%f, %f\n", position, otherPosition);
     double acceleration = getAcceleration(mass, otherMass, position, otherPosition, isFixed);
-    accelerations[access2Darray(planetId, dimensionId, planetCount)] = acceleration + accelerations[access2Darray(planetId, dimensionId, planetCount)];
-
+    accelerations[access2Darray(dimensionId, planetId, dimensionCount)] = acceleration + accelerations[access2Darray(dimensionId, planetId, dimensionCount)];
 }
 
 __kernel void advancePositions(
+    __global const double *fixed,
     __global double* positions,
     __global double* velocities,
     __global const double* accelerations,
@@ -68,12 +63,18 @@ __kernel void advancePositions(
     unsigned int planetId = get_global_id(0);
     unsigned int dimensionId = get_global_id(1);
 
-    double position = positions[access3Darray(time, planetId, dimensionId, planetCount, dimensionCount)];
+    // If the planet is fixed, we don't need to calculate anything
+    bool isFixed = fixed[planetId];
+    if (isFixed) {
+        return;
+    }
 
-    velocities[access2Darray(planetId, dimensionId, planetCount)] += accelerations[access2Darray(planetId, dimensionId, planetCount)] * dt;
-    double velocity = velocities[access2Darray(planetId, dimensionId, planetCount)];
+    double position = positions[access3Darray(dimensionId, planetId, time, dimensionCount, planetCount)];
+
+    velocities[access2Darray(dimensionId, planetId, dimensionCount)] += accelerations[access2Darray(dimensionId, planetId, dimensionCount)] * dt;
+    double velocity = velocities[access2Darray(dimensionId, planetId, dimensionCount)];
 
     double newPosition = position + velocity * dt;
-    positions[access3Darray(planetId, dimensionId, time, planetCount, dimensionCount)] = newPosition;
+    positions[access3Darray(dimensionId, planetId, time, dimensionCount, planetCount)] = newPosition;
 }
 

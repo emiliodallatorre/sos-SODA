@@ -34,14 +34,15 @@ system: System = System(
 )
 
 dt: int = 1
-steps: int = 100
+steps: int = 1000
 
 
 def simulate_with_opencl():
     simulation_results: list = system.simulate_with_opencl(dt, steps)
-    from plotter import Plotter
-    plotter: Plotter = Plotter(simulation_results, dt, steps)
-    plotter.plot()
+    system.simulate(dt, steps)
+    # from plotter import Plotter
+    # plotter: Plotter = Plotter(simulation_results, dt, steps)
+    # plotter.plot()
 
 
 def benchmark():
