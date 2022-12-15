@@ -1,3 +1,5 @@
+
+
 int access2Darray(int x, int y, int width) {
     return y * width + x;
 }
@@ -8,7 +10,8 @@ int access3Darray(int x, int y, int z, int width, int height) {
 
 double getAcceleration(double mass, double otherMass, double position, double otherPosition, bool fixed) {
     double distance = position - otherPosition;
-    if (fixed || distance == 0) {
+
+    if (fixed || fabs(distance) < 0.0001) {
         return 0.0f;
     }
 
@@ -22,12 +25,12 @@ double getAcceleration(double mass, double otherMass, double position, double ot
     return acceleration;
 }
 
-__kernel void simulate(
+__kernel void calculateAccelerations(
         __global const double *masses,
         __global const double *fixed,
         __global const double *positions,
-        __global const double *velocities,
 
+        int time,
         int planetCount,
         int dimensionCount,
 
@@ -37,24 +40,40 @@ __kernel void simulate(
     unsigned int otherPlanetId = get_global_id(1);
     unsigned int dimensionId = get_global_id(2);
 
-    uintptr_t planetCountCasted = (uintptr_t) planetCount;
-    // uintptr_t dimensionCountCasted = (uintptr_t) dimensionCount;
-
     double mass = masses[planetId];
     double otherMass = masses[otherPlanetId];
-    double position = positions[access2Darray(planetId, dimensionId, planetCountCasted)];
-    double otherPosition = positions[access2Darray(otherPlanetId, dimensionId, planetCountCasted)];
+    double position = positions[access3Darray(dimensionId, planetId, time, dimensionCount, planetCount)];
+    double otherPosition = positions[access3Darray(dimensionId, otherPlanetId, time, dimensionCount, planetCount)];
     bool isFixed = fixed[planetId];
 
-    // Print if fixed
-    // printf("PlanetId: %d, OtherPlanetId: %d, DimensionId: %d, IsFixed: %d\n", planetId, otherPlanetId, dimensionId, isFixed);
-    // Print planetId and mass
+    // Print position and planetId, dimensionId
+    // printf("PlanetId: %d, DimensionId: %d, Position: %f\n", planetId, dimensionId, position);
 
-    if (planetId != otherPlanetId) {
-        double acceleration = getAcceleration(mass, otherMass, position, otherPosition, isFixed);
-        accelerations[access2Darray(planetId, dimensionId, planetCount)] = acceleration + accelerations[access2Darray(planetId, dimensionId, planetCount)];
-        // printf("Planet %d, other planet %d, dimension %d, acceleration %f\n", planetId, otherPlanetId, dimensionId, acceleration);
-    }
+    // printf("%f, %f\n", position, otherPosition);
+    double acceleration = getAcceleration(mass, otherMass, position, otherPosition, isFixed);
+    accelerations[access2Darray(planetId, dimensionId, planetCount)] = acceleration + accelerations[access2Darray(planetId, dimensionId, planetCount)];
+
 }
 
+__kernel void advancePositions(
+    __global double* positions,
+    __global double* velocities,
+    __global const double* accelerations,
+
+    const int dt,
+    const int time,
+    const int planetCount,
+    const int dimensionCount
+) {
+    unsigned int planetId = get_global_id(0);
+    unsigned int dimensionId = get_global_id(1);
+
+    double position = positions[access3Darray(time, planetId, dimensionId, planetCount, dimensionCount)];
+
+    velocities[access2Darray(planetId, dimensionId, planetCount)] += accelerations[access2Darray(planetId, dimensionId, planetCount)] * dt;
+    double velocity = velocities[access2Darray(planetId, dimensionId, planetCount)];
+
+    double newPosition = position + velocity * dt;
+    positions[access3Darray(planetId, dimensionId, time, planetCount, dimensionCount)] = newPosition;
+}
 

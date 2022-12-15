@@ -1,8 +1,12 @@
+from copy import deepcopy
+
 import numpy as np
 import pyopencl as cl
 import pyopencl.array as pycl_array
 
+from models.planet import Planet
 from models.system import System
+from models.vector import Vector
 
 dimensions: int = 3
 
@@ -25,7 +29,7 @@ class OpenCLSystem:
         self.masses = np.array([planet.mass for planet in system.planets])
         self.fixed = np.array([1 if planet.fixed else 0 for planet in system.planets])
         self.positions = np.array(
-            [[planet.position.x, planet.position.y, planet.position.z] for planet in system.planets])
+            [[planet.position.x, planet.position.y, planet.position.z] for planet in system.planets], dtype=np.float64)
         self.velocities = np.array(
             [[planet.velocity.x, planet.velocity.y, planet.velocity.z] for planet in system.planets])
 
@@ -37,7 +41,6 @@ class OpenCLSystem:
         # Allocate memory on the device and copy the content of our numpy array
         self.masses = pycl_array.to_device(self.queue, self.masses)
         self.fixed = pycl_array.to_device(self.queue, self.fixed)
-        self.positions = pycl_array.to_device(self.queue, self.positions.flatten())
         self.velocities = pycl_array.to_device(self.queue, self.velocities.flatten())
         self.accelerations = pycl_array.empty(self.queue, len(self.system.planets) * dimensions, dtype=np.float64)
 
@@ -47,34 +50,72 @@ class OpenCLSystem:
 
         self.initialized = True
 
-    def simulate(self, steps: int, dt: float):
+    def simulate(self, steps: int, dt: int):
         if not self.initialized:
             self.initialize()
 
-        self.opencl_program.simulate(
-            self.queue,
-            (
-                len(self.system.planets),
-                len(self.system.planets),
-                dimensions,
-            ),
-            None,
+        self.positions = np.resize(self.positions.flatten(), ((1 + steps) * dimensions * len(self.system.planets)))
+        self.positions = pycl_array.to_device(self.queue, self.positions.flatten())
 
-            # Constants
-            self.masses.data,
-            self.fixed.data,
-            self.positions.data,
-            self.velocities.data,
+        for i in range(steps):
+            self.opencl_program.calculateAccelerations(
+                self.queue,
+                (
+                    len(self.system.planets),
+                    len(self.system.planets),
+                    dimensions,
+                ),
+                None,
 
-            # Support
-            np.int32(len(self.system.planets)),
-            np.int32(dimensions),
+                # Constants
+                self.masses.data,
+                self.fixed.data,
+                self.positions.data,
+                np.int32(i * dt),
 
-            # Results
-            self.accelerations.data,
-        )
+                # Support
+                np.int32(len(self.system.planets)),
+                np.int32(dimensions),
 
+                # Results
+                self.accelerations.data,
+            )
 
-        print(self.accelerations.reshape((len(self.system.planets), dimensions)))
+            self.opencl_program.advancePositions(
+                self.queue,
+                (
+                    len(self.system.planets),
+                    dimensions,
+                ),
+                None,
 
-        return
+                # Constants
+                self.positions.data,
+                self.velocities.data,
+                self.accelerations.data,
+                np.int32(dt),
+                np.int32(i * dt),
+
+                # Support
+                np.int32(len(self.system.planets)),
+                np.int32(dimensions),
+            )
+
+        self.positions = self.positions.reshape((1 + steps, len(self.system.planets), dimensions))
+
+        for time in range(steps + 1):
+            planets: list = []
+            for i, planet in enumerate(self.system.planets):
+                position: np.ndarray = self.positions[time][i].get()
+
+                new_planet = Planet(
+                    planet.name,
+                    planet.mass,
+                    Vector(*position),
+                    Vector(0, 0, 0), planet.color, planet.fixed,
+                )
+
+                planets.append(new_planet)
+            self.system.states.append(deepcopy(planets))
+
+        return self.system.states

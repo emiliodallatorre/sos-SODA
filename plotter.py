@@ -22,12 +22,13 @@ class Plotter:
 
         for planets in self.simulation_results:
             for planet in planets:
+                print(planet.position)
                 if abs(planet.position.x) > farthest_x:
-                    farthest_x = planet.position.x
+                    farthest_x = abs(planet.position.x)
                 if abs(planet.position.y) > farthest_y:
-                    farthest_y = planet.position.y
+                    farthest_y = abs(planet.position.y)
                 if abs(planet.position.z) > farthest_z:
-                    farthest_z = planet.position.z
+                    farthest_z = abs(planet.position.z)
 
         def animate(i):
             ax.clear()
