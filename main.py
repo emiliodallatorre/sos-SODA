@@ -9,7 +9,7 @@ system: System = System(
     G=1,
 )
 
-dt: float = 0.01
+dt: float = 0.001
 steps: int = 1000
 
 
@@ -18,11 +18,10 @@ def simulate(opencl: bool):
         simulation_results: list = system.simulate_with_opencl(dt, steps)
     else:
         simulation_results: list = system.simulate(dt, steps)
-    # system.simulate(dt, steps)
 
     from plotter import Plotter
     plotter: Plotter = Plotter(simulation_results, dt, steps)
-    plotter.show()
+    plotter.plot()
 
 
 def benchmark():
@@ -56,5 +55,27 @@ def benchmark():
     plt.show()
 
 
-simulate(True)
-# benchmark()
+def benchmark_difference():
+    cpu_states: list = system.simulate(dt, steps)
+    gpu_states: list = system.simulate_with_opencl(dt, steps)
+
+    differences: list = []
+    for i in range(steps):
+        difference: float = 0
+        for j in range(len(cpu_states[i])):
+            # Print CPU and GPU position
+            difference += cpu_states[i][j].position.distance(gpu_states[i][j].position)
+
+        print(difference)
+        differences.append(difference)
+
+    import matplotlib.pyplot as plt
+
+    plt.plot(range(steps), differences)
+    plt.xlabel("Step")
+    plt.ylabel("Difference")
+    plt.legend()
+    plt.show()
+
+
+benchmark_difference()

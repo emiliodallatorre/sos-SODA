@@ -31,22 +31,22 @@ planets: list = [
 dots: list = [
     Planet(
         "Random1",
-        1 / 2,
-        Vector(4, 0, 0),
+        3,
+        Vector(40, 0, 0),
         Vector(0, 0, 0),
         "blue",
     ),
     Planet(
         "Random2",
-        1 / 2,
-        Vector(0, -4, 0),
+        2,
+        Vector(0, -40, 0),
         Vector(0, 0, 0),
         "red",
     ),
     Planet(
         "Random3",
-        1 / 2,
-        Vector(0, 0, 4),
+        2,
+        Vector(0, 0, 40),
         Vector(0, 0, 0),
         "green",
     ),
