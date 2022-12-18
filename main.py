@@ -33,7 +33,7 @@ system: System = System(
     G=1,
 )
 
-dt: int = 1
+dt: float = 0.1
 steps: int = 1000
 
 
@@ -74,5 +74,6 @@ def benchmark():
     plt.ylabel("Time (ms)")
     plt.legend()
     plt.show()
+
 
 simulate_with_opencl()

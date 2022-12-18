@@ -50,7 +50,7 @@ class OpenCLSystem:
 
         self.initialized = True
 
-    def simulate(self, steps: int, dt: int):
+    def simulate(self, steps: int, dt: float) -> list:
         if not self.initialized:
             self.initialize()
 
@@ -71,7 +71,7 @@ class OpenCLSystem:
                 self.masses.data,
                 self.fixed.data,
                 self.positions.data,
-                np.int32(i * dt),
+                np.int32(i),
 
                 # Support
                 np.int32(len(self.system.planets)),
@@ -94,7 +94,7 @@ class OpenCLSystem:
                 self.positions.data,
                 self.velocities.data,
                 self.accelerations.data,
-                np.int32(dt),
+                np.float64(dt),
                 np.int32(i * dt),
 
                 # Support

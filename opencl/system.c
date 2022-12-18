@@ -29,7 +29,7 @@ __kernel void calculateAccelerations(
         __global const double *fixed,
         __global const double *positions,
 
-        int time,
+        int step,
         int planetCount,
         int dimensionCount,
 
@@ -41,8 +41,8 @@ __kernel void calculateAccelerations(
 
     double mass = masses[planetId];
     double otherMass = masses[otherPlanetId];
-    double position = positions[access3Darray(dimensionId, planetId, time, dimensionCount, planetCount)];
-    double otherPosition = positions[access3Darray(dimensionId, otherPlanetId, time, dimensionCount, planetCount)];
+    double position = positions[access3Darray(dimensionId, planetId, step, dimensionCount, planetCount)];
+    double otherPosition = positions[access3Darray(dimensionId, otherPlanetId, step, dimensionCount, planetCount)];
     bool isFixed = fixed[planetId];
 
     double acceleration = getAcceleration(mass, otherMass, position, otherPosition, isFixed);
@@ -55,7 +55,7 @@ __kernel void advancePositions(
     __global double* velocities,
     __global const double* accelerations,
 
-    const int dt,
+    const double dt,
     const int time,
     const int planetCount,
     const int dimensionCount
