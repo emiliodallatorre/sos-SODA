@@ -66,7 +66,6 @@ def benchmark_difference():
             # Print CPU and GPU position
             difference += cpu_states[i][j].position.distance(gpu_states[i][j].position)
 
-        print(difference)
         differences.append(difference)
 
     import matplotlib.pyplot as plt
