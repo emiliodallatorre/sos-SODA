@@ -71,7 +71,7 @@ __kernel void advancePositions(
 
     double position = positions[access3Darray(dimensionId, planetId, time, dimensionCount, planetCount)];
 
-    velocities[access2Darray(dimensionId, planetId, dimensionCount)] += accelerations[access2Darray(dimensionId, planetId, dimensionCount)] * dt;
+    velocities[access3Darray(dimensionId, planetId, time, dimensionCount, planetCount)] += accelerations[access2Darray(dimensionId, planetId, dimensionCount)] * dt;
     double velocity = velocities[access2Darray(dimensionId, planetId, dimensionCount)];
 
     double newPosition = position + velocity * dt;

@@ -31,7 +31,7 @@ class OpenCLSystem:
         self.positions = np.array(
             [[planet.position.x, planet.position.y, planet.position.z] for planet in system.planets], dtype=np.float64)
         self.velocities = np.array(
-            [[planet.velocity.x, planet.velocity.y, planet.velocity.z] for planet in system.planets])
+            [[planet.velocity.x, planet.velocity.y, planet.velocity.z] for planet in system.planets], dtype=np.float64)
 
     def initialize(self):
         # Select a device
@@ -41,7 +41,6 @@ class OpenCLSystem:
         # Allocate memory on the device and copy the content of our numpy array
         self.masses = pycl_array.to_device(self.queue, self.masses)
         self.fixed = pycl_array.to_device(self.queue, self.fixed)
-        self.velocities = pycl_array.to_device(self.queue, self.velocities.flatten())
         self.accelerations = pycl_array.empty(self.queue, len(self.system.planets) * dimensions, dtype=np.float64)
 
         with open("opencl/system.c", "r") as f:
@@ -56,6 +55,9 @@ class OpenCLSystem:
 
         self.positions = np.resize(self.positions.flatten(), ((1 + steps) * dimensions * len(self.system.planets)))
         self.positions = pycl_array.to_device(self.queue, self.positions.flatten())
+
+        self.velocities = np.resize(self.velocities.flatten(), ((1 + steps) * dimensions * len(self.system.planets)))
+        self.velocities = pycl_array.to_device(self.queue, self.velocities.flatten())
 
         for i in range(steps):
             self.opencl_program.calculateAccelerations(
@@ -103,6 +105,7 @@ class OpenCLSystem:
             )
 
         self.positions = self.positions.reshape((1 + steps, len(self.system.planets), dimensions))
+        self.velocities = self.velocities.reshape((1 + steps, len(self.system.planets), dimensions))
 
         for time in range(steps + 1):
             planets: list = []
@@ -113,7 +116,8 @@ class OpenCLSystem:
                     planet.name,
                     planet.mass,
                     Vector(*position),
-                    Vector(0, 0, 0), planet.color, planet.fixed,
+                    Vector(*self.velocities[time][i].get()),
+                    planet.color, planet.fixed,
                 )
 
                 planets.append(new_planet)

@@ -4,7 +4,7 @@ from matplotlib.pyplot import subplots
 
 
 class Plotter:
-    def __init__(self, simulation_results: list, dt: float, steps: int):
+    def __init__(self, simulation_results: list, dt: float, steps: int, size: int = None, fixedsize: bool = True):
         self.simulation_results = simulation_results
         self.dt = dt
         self.steps = steps
@@ -32,9 +32,15 @@ class Plotter:
         def animate(i):
             ax.clear()
 
-            ax.set_xlim(-farthest_x, farthest_x)
-            ax.set_ylim(-farthest_y, farthest_y)
-            ax.set_zlim(-farthest_z, farthest_z)
+            if fixedsize:
+                if size is None:
+                    ax.set_xlim(-farthest_x, farthest_x)
+                    ax.set_ylim(-farthest_y, farthest_y)
+                    ax.set_zlim(-farthest_z, farthest_z)
+                else:
+                    ax.set_xlim(-size, size)
+                    ax.set_ylim(-size, size)
+                    ax.set_zlim(-size, size)
 
             for planet in self.simulation_results[i]:
                 ax.plot(
@@ -60,8 +66,7 @@ class Plotter:
                 ax.set_ylabel("Y")
                 ax.set_zlabel("Z")
 
-        self.animation = FuncAnimation(fig, animate, frames=self.steps,
-                                       interval=dt)
+        self.animation = FuncAnimation(fig, animate, frames=self.steps, interval=40)
 
     def plot(self):
         video_file = r"animation.mp4"

@@ -1,48 +1,28 @@
 from tqdm import tqdm
 
-from models.planet import Planet
+import references
 from models.system import System
-from models.vector import Vector
 from utils.benchmark import Benchmark
 
 system: System = System(
-    [
-        Planet(
-            "Sun",
-            1,
-            Vector(0, 0, 0),
-            Vector(0, 0, 0),
-            "yellow",
-            True,
-        ),
-        Planet(
-            "Earth",
-            1 / 2,
-            Vector(4, 0, 0),
-            Vector(0, 1 / 2, 0),
-            "blue",
-        ),
-        # Planet(
-        #    "Moon",
-        #    1 / 2000,
-        #    Vector(4 + 0.04 * sqrt(2) / 2, 0, 0.04 * sqrt(2) / 2),
-        #    Vector(-5 / sqrt(2) * sqrt(2) / 2, 1 / 2, 5 / sqrt(2) * sqrt(2) / 2),
-        #    "gray",
-        # ),
-    ],
+    references.dots,
     G=1,
 )
 
-dt: float = 0.1
+dt: float = 0.01
 steps: int = 1000
 
 
-def simulate_with_opencl():
-    simulation_results: list = system.simulate_with_opencl(dt, steps)
-    system.simulate(dt, steps)
-    # from plotter import Plotter
-    # plotter: Plotter = Plotter(simulation_results, dt, steps)
-    # plotter.plot()
+def simulate(opencl: bool):
+    if opencl:
+        simulation_results: list = system.simulate_with_opencl(dt, steps)
+    else:
+        simulation_results: list = system.simulate(dt, steps)
+    # system.simulate(dt, steps)
+
+    from plotter import Plotter
+    plotter: Plotter = Plotter(simulation_results, dt, steps)
+    plotter.show()
 
 
 def benchmark():
@@ -76,4 +56,5 @@ def benchmark():
     plt.show()
 
 
-simulate_with_opencl()
+simulate(True)
+# benchmark()
