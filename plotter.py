@@ -61,7 +61,7 @@ class Plotter:
                 ax.set_zlabel("Z")
 
         self.animation = FuncAnimation(fig, animate, frames=self.steps,
-                                       interval=dt * 1000)
+                                       interval=dt)
 
     def plot(self):
         video_file = r"animation.mp4"
